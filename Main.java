@@ -20,7 +20,7 @@ public class Main {
 		 * 
 		 *  
 		 *  Il va nous falloir générer des données de manières pseudo-aléatoire.
-Pour commencer, il faudrait faire un petit code JAVA qui, à partir d'une entrée contenant le statut
+à partir d'une entrée contenant le statut
  (célibataire, marié) et d'une date de naissance en sortir des codes de revenus comme le 1AJ et le 1BJ
   (revenu individu 1, et revenu individu 2).
 
@@ -30,7 +30,7 @@ une chaine comme ça : 1AJ23000#1BJ42000
 		 */
 		
 		Main main = new Main();
-		String fichier = "nomFichier.csv";
+		String fichier = "test.csv";
 		main.lectureCSV(fichier);
 		
 
@@ -38,7 +38,10 @@ une chaine comme ça : 1AJ23000#1BJ42000
 	
 	public void lectureCSV(String fichier) {
 		
+		char situation;
 		int nbPersonnesFoyer;
+		int anneeNaissance;
+		int revenu;
 		// 1 : célibataire
 		// 2 : marié
 		// 3 : marié et 1 enfant
@@ -55,8 +58,13 @@ une chaine comme ça : 1AJ23000#1BJ42000
 
 			String[] tab = ligne.split(split);
 
-			System.out.println("nbPersonnesFoyer= " + tab[0] + " , dateDeNaissance=" + tab[1] + " , revenu= " + tab[2]);
+			System.out.println("situation=" + tab[0] + ", nbPersonnesFoyer=" + tab[1] + ", anneeNaissance=" + tab[2] + ", revenu=" + tab[3]);
 
+			situation = tab[0].charAt(0);
+			nbPersonnesFoyer = Integer.parseInt(tab[1]);
+			anneeNaissance = Integer.parseInt(tab[2]);
+			revenu = Integer.parseInt(tab[3]);
+			
 			}
 
 		} catch (FileNotFoundException e) {
