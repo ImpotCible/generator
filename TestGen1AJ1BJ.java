@@ -1,10 +1,12 @@
 import java.lang.*;
 import java.util.Random;
-
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -26,7 +28,7 @@ public class TestGen1AJ1BJ {
 		 */
 
 		TestGen1AJ1BJ main = new TestGen1AJ1BJ();
-		String fichier = "test.csv";
+		String fichier = "in.csv";
 		main.lectureCSV(fichier);
 		
 		
@@ -76,11 +78,12 @@ public class TestGen1AJ1BJ {
 		long id;
 		int date_naissance;
 		int code_postal;
-		char sit_fam;
+		String sit_fam;
 		// C : célibataire
 		// M : marié
 		int nombre_enfants;
-		long net_imposable;
+		String net_imposable;
+		String codes_revenu;
 		
 
 		//lecture du fichier texte	
@@ -92,23 +95,41 @@ public class TestGen1AJ1BJ {
 		try {
 
 			br = new BufferedReader(new FileReader(fichier));
+			int i=0;
 			while ((ligne = br.readLine()) != null) {
+				i++;
+				if (!ligne.startsWith("id")) {
 
 				String[] tab = ligne.split(split);
 
-				System.out.println("id=" + tab[0] 
+				/*System.out.println("id=" + tab[0] 
 						+ ", date_naissance=" + tab[1] 
 						+ ", code_postal=" + tab[2] 
 						+ ", sit_fam=" + tab[3]
 						+ ", nombre_enfants=" + tab[4]
 						+ ", net_imposable=" + tab[5]);
+					*/
 
-				id = Long.parseLong(tab[0]);
-				date_naissance = Integer.parseInt(tab[1]);
-				code_postal = Integer.parseInt(tab[2]);
-				sit_fam = tab[0].charAt(3);
-				nombre_enfants = Integer.parseInt(tab[4]);
-				net_imposable = Long.parseLong(tab[5]);
+				id = i;
+				date_naissance = Integer.parseInt(tab[0]);
+				//code_postal = Integer.parseInt(tab[1]);
+				sit_fam = tab[1];
+				nombre_enfants = Integer.parseInt(tab[2]);
+				int zone = computeZone();
+				net_imposable = genRevenu(sit_fam, zone, true);
+				codes_revenu = genRevenu(sit_fam, zone, false);
+				
+				/*System.out.println("id=" + tab[0] 
+						+ ", date_naissance=" + tab[1] 
+						+ ", code_postal=" + tab[2] 
+						+ ", sit_fam=" + tab[3]
+						+ ", nombre_enfants=" + tab[4]
+						+ ", net_imposable=" + net_imposable
+						+ ", codes_revenu=" + codes_revenu);*/
+				
+				generationCSV(id, date_naissance, sit_fam, nombre_enfants, net_imposable, codes_revenu);
+				
+				}
 			}
 
 		} catch (FileNotFoundException e) {
@@ -154,9 +175,10 @@ public class TestGen1AJ1BJ {
 	 * @param situation
 	 * @return
 	 */
-	public boolean estMarie (char situation) {
-		if (situation != 'M')
+	public boolean estMarie (String situation) {
+		if (situation != "'M'" && situation != "'O'") {
 			return false;
+		}
 		return true;
 	}
 	
@@ -164,11 +186,11 @@ public class TestGen1AJ1BJ {
 	 * en fonction de estMarie, appelle genMarie ou genNonMarie
 	 * @params situation, zone (-> générée avec computeZone())
 	 */
-	public void genRevenu (char situation, int zone) {
+	public String genRevenu (String situation, int zone, boolean nombre) {
 		if (estMarie(situation)==true)
-			genMarie(zone);
+			return genMarie(zone, nombre);
 		else
-			genCelib(zone);
+			return genCelib(zone, nombre);
 	}	
 
 	/**
@@ -178,25 +200,35 @@ public class TestGen1AJ1BJ {
 	 * @param zone
 	 * @return
 	 */
-	public String genMarie (double zone) {
+	public String genMarie (double zone, boolean nombre) {
 		int i = new Random().nextInt(100);
 		i++;
 		if (i < 30) 
-			return genCelib(zone);
-		else {
-			String revenu1AJ, revenu1BJ;
-			String revenufinal;
-			int higher = (int) (10000 * Math.exp((double)zone) - zone * Math.random()*10000);
-			int lower = (int) (10000 * Math.exp((double)zone) + zone * Math.random()*10000);
-			int random = (int)(Math.random() * (higher-lower)) + lower;
-			revenu1AJ = "1AJ" + random;
-			random = (int)(Math.random() * (higher-lower)) + lower;
-			revenu1BJ = "1BJ" + random; 
-			revenufinal = revenu1AJ + "#" + revenu1BJ;
+			return genCelib(zone, nombre);
+		else {			
+			
+				String revenu1AJ, revenu1BJ;
+				String revenufinal;
+				
+				int higher = (int) (10000 * Math.exp((double)zone) - zone * Math.random()*10000);
+				int lower = (int) (10000 * Math.exp((double)zone) + zone * Math.random()*10000);
+				
+				int random = (int)(Math.random() * (higher-lower)) + lower;
+				int random2 = (int)(Math.random() * (higher-lower)) + lower;
+				
+				if (!nombre) { 
+					revenu1AJ = "1AJ" + random;					
+					revenu1BJ = "1BJ" + random2; 
+					revenufinal = revenu1AJ + "#" + revenu1BJ;
+					return revenufinal;	
+				}
+				else
+					return Integer.toString(random + random2);
+			}
 	
-			return revenufinal;	
 		}
-	}
+			
+	
 
 	/**
 	 * Génération de revenu annuel pour un statut non marié
@@ -204,14 +236,45 @@ public class TestGen1AJ1BJ {
 	 * @param zone
 	 * @return
 	 */
-	public String genCelib (double zone) {
+	public String genCelib (double zone, boolean nombre) {
 
 		String revenuCelib;
 		int higher = (int) (10000 * Math.exp((double)zone) - zone * Math.random()*10000); 
 		int lower = (int) (10000 * Math.exp((double)zone) + zone * Math.random()*10000);
 		int random = (int)(Math.random() * (higher-lower)) + lower;
-		revenuCelib = "1AJ" + random; 
+		if (!nombre) {
+			revenuCelib = "1AJ" + random; 
+			return revenuCelib;
+		}
+		else 
+			return Integer.toString(random);
 		
-		return revenuCelib;
+	}
+	
+	public void generationCSV (long id, int date_naissance, String sit_fam, int nombre_enfants, String net_imposable, String codes_revenu) {
+		
+		try {
+
+			File file = new File("insert_data.sql");
+	
+			// if file doesnt exists, then create it
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+	
+			FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
+			BufferedWriter bw = new BufferedWriter(fw);
+			
+			bw.write("INSERT INTO declarants (id, date_naissance, code_postal,"
+					+ " sit_fam, nombre_enfants, net_imposable, codes_revenu,"
+					+ " montant_ir, cluster) VALUES (" + id + ", " + date_naissance + ", 00000, "
+					+ sit_fam + ", " + nombre_enfants + ", " + net_imposable + ", " + codes_revenu + ", NULL, NULL);");
+			bw.write("\n");
+			bw.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 }
