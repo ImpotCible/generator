@@ -176,7 +176,10 @@ public class TestGen1AJ1BJ {
 	 * @return
 	 */
 	public boolean estMarie (String situation) {
-		if (situation != "'M'" && situation != "'O'") {
+		
+		char situ = situation.charAt(1);
+		
+		if (situ != 'M' && situ != 'O') {
 			return false;
 		}
 		return true;
@@ -268,7 +271,7 @@ public class TestGen1AJ1BJ {
 			bw.write("INSERT INTO declarants (id, date_naissance, code_postal,"
 					+ " sit_fam, nombre_enfants, net_imposable, codes_revenu,"
 					+ " montant_ir, cluster) VALUES (" + id + ", " + date_naissance + ", 00000, "
-					+ sit_fam + ", " + nombre_enfants + ", " + net_imposable + ", " + codes_revenu + ", NULL, NULL);");
+					+ sit_fam + ", " + nombre_enfants + ", " + net_imposable + ", " + "'" + codes_revenu + "'" + ", NULL, NULL);");
 			bw.write("\n");
 			bw.close();
 
