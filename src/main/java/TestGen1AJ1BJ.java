@@ -103,7 +103,16 @@ public class TestGen1AJ1BJ {
 						codes_revenu += "#" + genCodeRevenuFoncier(deficitFoncier);
 					}					
 					
-					// à la fin on calcul le net imposable ???					
+					// calcul de la pension alimentaire				
+					int pensionAlimentaire = pensionAlimentaire(salaires, date_naissance);
+					if(pensionAlimentaire > 0){
+						codes_revenu += "#" + genCodePensionAlimentaire(pensionAlimentaire);
+					}
+					
+					// calcul de la souscription au capital PME
+					
+					// calcul de l'emploi d'un salarié à docmicile
+					
 					
 					generationCSV(id, date_naissance, sit_fam, nombre_enfants, salairesText, codes_revenu);
 				
@@ -124,6 +133,32 @@ public class TestGen1AJ1BJ {
 			}
 		}
 	}
+	
+	
+	public int souscriptionPME(int salaires){
+		
+		return (int)0;
+		
+	}
+	
+	public String genCodeSouscitpionPME(int souscription){
+		return "7CF" + Integer.toString(souscription);
+	}
+	
+	
+	/*
+	 * Generation du code pension alimentaire versée à un enfant majeur
+	 */
+	public String genCodePensionAlimentaire(int pension){
+		
+		if(pension > 0){
+			return "6GI" + Integer.toString(pension); 
+		} else {
+			return null;
+		}
+		
+	}
+	
 	
 	/*
 	 * calcul d'une penseion alimentaire en fonction du salaire imposable et de l'année de naissance
