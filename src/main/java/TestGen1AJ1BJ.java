@@ -330,10 +330,10 @@ public class TestGen1AJ1BJ {
 		if (i < 30) {
 			return 1;
 		} 
-		else if (i<65) {
+		else if (i<80) {
 			return 2;
 		}
-		else if (i<90) {
+		else if (i<95) {
 			return 3;
 		}
 		else if (i<99) {
