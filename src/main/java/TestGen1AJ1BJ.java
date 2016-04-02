@@ -327,10 +327,10 @@ public class TestGen1AJ1BJ {
 	public int computeZone() {
 		int i = new Random().nextInt(100);
 		i++;
-		if (i < 30) {
+		if (i < 20) {
 			return 1;
 		} 
-		else if (i<80) {
+		else if (i<65) {
 			return 2;
 		}
 		else if (i<95) {
@@ -432,27 +432,44 @@ public class TestGen1AJ1BJ {
 	public void generationCSV (long id, int date_naissance, String sit_fam, int nombre_enfants, String salairesText, String codes_revenu) {
 		
 		try {
-
-			File file = new File("insert_data.sql");
-	
+			
+			// création du fichier contenant les data
+			File fileData = new File("data.csv");
+			if(!fileData.exists()){
+				fileData.createNewFile();
+			};
+			
+			// création du fichier d'insertion SQL
+			File file = new File("insert_data.sql");	
 			// if file doesnt exists, then create it
 			if (!file.exists()) {
 				file.createNewFile();
 			}
 	
+			FileWriter fwd = new FileWriter(fileData.getAbsoluteFile(), true);
 			FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
 			BufferedWriter bw = new BufferedWriter(fw);
+			BufferedWriter bwd = new BufferedWriter(fwd);
 			
 			String line = "INSERT INTO declarants (id, date_naissance, code_postal,"
 					+ " sit_fam, nombre_enfants, salaires, codes_revenu,"
 					+ " montant_ir, cluster) VALUES (" + id + ", " + date_naissance + ", 00000, "
 					+ sit_fam + ", " + nombre_enfants + ", " + salairesText + ", " + "'" + codes_revenu + "'" + ", NULL, NULL);";
 			
+			String lineData = id + ";" + date_naissance + ";" + salairesText;
+			
 			System.out.println(line);
 			
+			// écriture des info sql
 			bw.write(line);
 			bw.write("\n");
 			bw.close();
+			
+			// écriture des infos csv
+			bwd.write(lineData);
+			bwd.write("\n");
+			bwd.close();
+		
 
 		} catch (IOException e) {
 			e.printStackTrace();
