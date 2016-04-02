@@ -28,45 +28,9 @@ public class TestGen1AJ1BJ {
 		 */
 
 		TestGen1AJ1BJ main = new TestGen1AJ1BJ();
-		String fichier = "in.csv";
-		main.lectureCSV(fichier);
+		String fichier = "file/in.csv";
+		main.lectureCSV(fichier);		
 		
-		
-		//Vérification du générateur de zone: 30% zone1, 30% zone2, 25% zone3, 14% zone 4, 1% zone1.
-		
-		/*int zone = main.computeZone();
-		int tab[] = new int[1000];
-		System.out.println("zone" + zone + ":");
-		System.out.println(main.genMarie(zone));
-		
-		for (int i=0; i<1000; i++) {
-			zone = main.computeZone();
-			tab[i]= zone;
-		}
-		
-		int occ1=0;
-		int occ2=0;
-		int occ3=0;
-		int occ4=0;
-		int occ5=0;
-		for (int y=0; y < tab.length; y++){
-			if (tab[y]==1)
-				occ1 ++;
-			if (tab[y]==2)
-				occ2 ++;
-			if (tab[y]==3)
-				occ3 ++;
-			if (tab[y]==4)
-				occ4 ++;
-			if (tab[y]==5)
-				occ5 ++;
-		}
-		System.out.println("nb de 1: " + occ1 + "\n" +
-				"nb de 2: " + occ2 + "\n" +
-				"nb de 3: " + occ3 + "\n" +
-				"nb de 4: " + occ4 + "\n" +
-				"nb de 5: " + occ5 + "\n");
-		*/
 	}
 
 	/**
@@ -79,55 +43,69 @@ public class TestGen1AJ1BJ {
 		int date_naissance;
 		int code_postal;
 		String sit_fam;
-		// C : célibataire
-		// M : marié
 		int nombre_enfants;
 		String net_imposable;
-		String codes_revenu;
-		
+		String codes_revenu;		
 
 		//lecture du fichier texte	
 		BufferedReader br = null;
 		String ligne = "";
-		String split = ","; // délimiteur du csv
-		
+		String split = ","; // délimiteur du csv		
 		
 		try {
 
 			br = new BufferedReader(new FileReader(fichier));
 			int i=0;
+			
+			// tans qu'on a des lignes à anlyser
 			while ((ligne = br.readLine()) != null) {
+				
 				i++;
+				// si m'a ligne n'est pas la ligne d'entête
 				if (!ligne.startsWith("id")) {
 
-				String[] tab = ligne.split(split);
-
-				/*System.out.println("id=" + tab[0] 
-						+ ", date_naissance=" + tab[1] 
-						+ ", code_postal=" + tab[2] 
-						+ ", sit_fam=" + tab[3]
-						+ ", nombre_enfants=" + tab[4]
-						+ ", net_imposable=" + tab[5]);
-					*/
-
-				id = i;
-				date_naissance = Integer.parseInt(tab[0]);
-				//code_postal = Integer.parseInt(tab[1]);
-				sit_fam = tab[1];
-				nombre_enfants = Integer.parseInt(tab[2]);
-				int zone = computeZone();
-				net_imposable = genRevenu(sit_fam, zone, true);
-				codes_revenu = genRevenu(sit_fam, zone, false);
-				
-				/*System.out.println("id=" + tab[0] 
-						+ ", date_naissance=" + tab[1] 
-						+ ", code_postal=" + tab[2] 
-						+ ", sit_fam=" + tab[3]
-						+ ", nombre_enfants=" + tab[4]
-						+ ", net_imposable=" + net_imposable
-						+ ", codes_revenu=" + codes_revenu);*/
-				
-				generationCSV(id, date_naissance, sit_fam, nombre_enfants, net_imposable, codes_revenu);
+					String[] tab = ligne.split(split);
+					
+					id = i;
+					date_naissance = Integer.parseInt(tab[0]);
+					sit_fam = tab[1];
+					nombre_enfants = Integer.parseInt(tab[2]);
+					int zone = computeZone();
+					// net_imposable = genRevenu(sit_fam, zone, true);
+					codes_revenu = genRevenu(sit_fam, zone, false);
+					// calcul du net imposable à partir du codes_revenus
+					
+					// split #
+					String[] revenus = codes_revenu.split("#");
+					// on a obligatoirement le revenu 1AJ
+					String aj = revenus[0];
+					int salaires = Integer.parseInt(aj.substring(3)); // on extrait après le code revenu
+					if(revenus.length > 1){
+						// a les revenus du conjoint à ajouter
+						String bj = revenus[1];
+						salaires += Integer.parseInt(bj.substring(3));
+					}
+					String salairesText = Integer.toString(salaires);
+					
+					/*System.out.println("id=" + tab[0] 
+							+ ", date_naissance=" + tab[1] 
+							+ ", code_postal=" + tab[2] 
+							+ ", sit_fam=" + tab[3]
+							+ ", nombre_enfants=" + tab[4]
+							+ ", net_imposable=" + net_imposable
+							+ ", codes_revenu=" + codes_revenu);*/
+					
+					// ajout du déficit foncier
+					
+					int deficitFoncier = revenuFoncier(salaires);
+					// si deficite foncier != 0 on l'ajoute au code reveus
+					if(deficitFoncier < 0){
+						codes_revenu += "#" + genCodeRevenuFoncier(deficitFoncier);
+					}					
+					
+					// à la fin on calcul le net imposable ???					
+					
+					generationCSV(id, date_naissance, sit_fam, nombre_enfants, salairesText, codes_revenu);
 				
 				}
 			}
@@ -145,6 +123,121 @@ public class TestGen1AJ1BJ {
 				}
 			}
 		}
+	}
+	
+	/*
+	 * calcul d'une penseion alimentaire en fonction du salaire imposable et de l'année de naissance
+	 */
+	public int pensionAlimentaire(int salairesImposable, int anneeNaissance){
+		
+		// la pension alimentaire maxi déductible est de 5732€
+		int pensionMax = 5732;
+		
+		// pour avoir des enfant majeur il faut que le contribuable ai 36 ans
+		int age = (int)2014 - anneeNaissance;
+		
+		if(age < 36){
+			
+			return (int)0;
+			
+		} else if (age < 40){
+			
+			// par défaut 90% des gens ne verse pas
+			int limite = 90;
+			
+			// si les salaires sont important on diminue le nombre de personne qui ne verse pas
+			if(salairesImposable > 26000){
+				limite = 40;
+			}
+			
+			// dans 90% des cas on a pas de pension alimentaire versée
+			int p = new Random().nextInt(100) + 1;
+			
+			if(p <= limite){
+				
+				return (int)0;
+				
+			} else {
+				
+				// on verse entre 2000 et 5000;
+				return new Random().nextInt(9732) + 1 - 2000;
+				
+			}
+			
+		} else {
+			
+			// dans 60% des cas on a pas de pension aliemntaire de versée
+			int p = new Random().nextInt(100) + 1;
+			
+			int limite = 90;
+			
+			// si les salaires sont important on diminue le nombre de personne qui ne verse pas
+			if(salairesImposable > 26000){
+				limite = 40;
+			}
+			
+			if(p <= limite){
+				
+				return (int)0;
+				
+			} else {
+				
+				// on verse entre 3000 et 5000;
+				return new Random().nextInt(10732) + 1 - 3000;
+				
+			}
+			
+		}		
+		
+	}
+	
+	/*
+	 * Public fonction qui calcul le déficit foncier on passe en entrée le ni
+	 * 
+	 */
+	public int revenuFoncier(int salairesImposable){
+		
+		int res = 0;
+		
+		// dans 50% des cas on met du déficit foncier
+		int i = new Random().nextInt(100) + 1;
+		i++;
+		
+		if(i >= 50){		
+		
+			int r = new Random().nextInt(4000) + 1;
+			
+			if(salairesImposable < 18000){
+				
+				int min = - 4000;				
+				res = min + r;
+				
+			} else if(salairesImposable < 32000){
+				
+				int min = -8000;
+				res = min + r;
+				
+			} else {
+				
+				int min = -10700;
+				res = min + r;
+				
+			}
+		
+		}
+		
+		return res;
+		
+	}
+	
+	/*
+	 * Génère le code du déficite foncier
+	 */
+	public String genCodeRevenuFoncier(int revenu){
+		
+		String codeRF = "4BC";
+		return codeRF + revenu;
+		
 	}
 	
 	/** 30% zone 1, 30% zone 2, 25% zone 3, 14% zone 4, 1% zone 5
@@ -204,6 +297,7 @@ public class TestGen1AJ1BJ {
 	 * @return
 	 */
 	public String genMarie (double zone, boolean nombre) {
+		
 		int i = new Random().nextInt(100);
 		i++;
 		if (i < 30) 
@@ -254,7 +348,7 @@ public class TestGen1AJ1BJ {
 		
 	}
 	
-	public void generationCSV (long id, int date_naissance, String sit_fam, int nombre_enfants, String net_imposable, String codes_revenu) {
+	public void generationCSV (long id, int date_naissance, String sit_fam, int nombre_enfants, String salairesText, String codes_revenu) {
 		
 		try {
 
@@ -268,10 +362,14 @@ public class TestGen1AJ1BJ {
 			FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
 			BufferedWriter bw = new BufferedWriter(fw);
 			
-			bw.write("INSERT INTO declarants (id, date_naissance, code_postal,"
-					+ " sit_fam, nombre_enfants, net_imposable, codes_revenu,"
+			String line = "INSERT INTO declarants (id, date_naissance, code_postal,"
+					+ " sit_fam, nombre_enfants, salaires, codes_revenu,"
 					+ " montant_ir, cluster) VALUES (" + id + ", " + date_naissance + ", 00000, "
-					+ sit_fam + ", " + nombre_enfants + ", " + net_imposable + ", " + "'" + codes_revenu + "'" + ", NULL, NULL);");
+					+ sit_fam + ", " + nombre_enfants + ", " + salairesText + ", " + "'" + codes_revenu + "'" + ", NULL, NULL);";
+			
+			System.out.println(line);
+			
+			bw.write(line);
 			bw.write("\n");
 			bw.close();
 
