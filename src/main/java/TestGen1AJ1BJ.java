@@ -317,7 +317,7 @@ public class TestGen1AJ1BJ {
 	public String genCodeRevenuFoncier(int revenu){
 		
 		String codeRF = "4BC";
-		return codeRF + revenu;
+		return codeRF + Math.abs(revenu);
 		
 	}
 	
@@ -330,10 +330,10 @@ public class TestGen1AJ1BJ {
 		if (i < 30) {
 			return 1;
 		} 
-		else if (i<60) {
+		else if (i<65) {
 			return 2;
 		}
-		else if (i<85) {
+		else if (i<90) {
 			return 3;
 		}
 		else if (i<99) {
