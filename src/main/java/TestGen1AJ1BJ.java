@@ -110,6 +110,10 @@ public class TestGen1AJ1BJ {
 					}
 					
 					// calcul de la souscription au capital PME
+					int souscriptionPME = souscriptionPME(salaires);
+					if(souscriptionPME > 0){
+						codes_revenu += "#" + genCodeSouscitpionPME(souscriptionPME);
+					}
 					
 					// calcul de l'emploi d'un salarié à docmicile
 					
@@ -137,7 +141,23 @@ public class TestGen1AJ1BJ {
 	
 	public int souscriptionPME(int salaires){
 		
-		return (int)0;
+		// dans 40% des cas on met PME
+		int i = new Random().nextInt(100) + 1;
+		i++;
+		
+		if(i <= 40){
+			
+			if(salaires < 50000){
+				return (int)0;
+			} else if(salaires <70000){
+				return new Random().nextInt(2000) + 1 + 4000;
+			} else {
+				return new Random().nextInt(2000) + 1 + 10000;
+			}
+			
+		} else {
+			return (int)0;
+		}	
 		
 	}
 	
