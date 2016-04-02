@@ -162,6 +162,7 @@ public class TestGen1AJ1BJ {
 		}
 		
 	}
+	
 	public String genCodeEmploiSalarieDomicile(int montantVerse){
 		return "7DB" + Integer.toString(montantVerse);
 	}
@@ -190,8 +191,7 @@ public class TestGen1AJ1BJ {
 	
 	public String genCodeSouscitpionPME(int souscription){
 		return "7CF" + Integer.toString(souscription);
-	}
-	
+	}	
 	
 	/*
 	 * Generation du code pension alimentaire versée à un enfant majeur
@@ -204,8 +204,7 @@ public class TestGen1AJ1BJ {
 			return null;
 		}
 		
-	}
-	
+	}	
 	
 	/*
 	 * calcul d'une penseion alimentaire en fonction du salaire imposable et de l'année de naissance
