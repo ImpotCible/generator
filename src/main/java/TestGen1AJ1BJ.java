@@ -116,7 +116,10 @@ public class TestGen1AJ1BJ {
 					}
 					
 					// calcul de l'emploi d'un salarié à docmicile
-					
+					int emploiSalarieDomicile = emploiSalarieDomicile(salaires);
+					if(emploiSalarieDomicile > 0){
+						codes_revenu += "#" + genCodeEmploiSalarieDomicile(emploiSalarieDomicile);
+					}
 					
 					generationCSV(id, date_naissance, sit_fam, nombre_enfants, salairesText, codes_revenu);
 				
@@ -138,6 +141,30 @@ public class TestGen1AJ1BJ {
 		}
 	}
 	
+	public int emploiSalarieDomicile(int salaires){
+		
+		// dans 40% des cas on met du salarié à domicile
+		int i = new Random().nextInt(100) + 1;
+		i++;
+		
+		if(i <= 40){
+			if(salaires < 35000){
+				return (int)0;
+			} else if(salaires < 70000){
+				// on retourne 4000 plus ou moins 1000
+				return new Random().nextInt(1000) + 1 + 4000;
+			} else {
+				// on bombarde au max cad 8000 plus ou moins 10000
+				return new Random().nextInt(2000) + 1 + 8000;
+			}
+		} else {
+			return (int)0;
+		}
+		
+	}
+	public String genCodeEmploiSalarieDomicile(int montantVerse){
+		return "7DB" + Integer.toString(montantVerse);
+	}
 	
 	public int souscriptionPME(int salaires){
 		
